@@ -79,6 +79,10 @@ function App() {
   };
 
   const captureImage = () => {
+    // Clear the canvas before capturing
+    const ctx = canvasRef.current.getContext("2d");
+    ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+
     if (webcamRef.current) {
       const imageSrc = webcamRef.current.getScreenshot();
       setCapturedImage(imageSrc);
