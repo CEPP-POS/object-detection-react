@@ -89,7 +89,7 @@ function App() {
       setShowWebcam(false);
     }
   };
-  // asasdasdasdsadsasadsad
+
   const startCountdown = () => {
     if (!isCountingDown && !isCapturing) {
       setIsCountingDown(true);
@@ -106,7 +106,7 @@ function App() {
       const net = await cocossd.load();
       setInterval(() => {
         detect(net);
-      }, 10);
+      }, 333);
     };
     runCoco();
   }, []);
