@@ -14,12 +14,14 @@ function App() {
   const [isCountingDown, setIsCountingDown] = useState(false);
   const [capturedImage, setCapturedImage] = useState(null);
   const [waitingForDecision, setWaitingForDecision] = useState(false);
-  let capturing = false;
+  const [isCapturing, setIsCapturing] = useState(false);
   // Modify handleCancel to reset the waiting state
   const handleCancel = () => {
-    capturing = false
+    setIsCapturing(false);
     setCapturedImage(null);
     setWaitingForDecision(false);
+    setIsCountingDown(false);
+    setIsDetecting(true);
   };
 
   // Modify handleAccept to reset the waiting state
@@ -34,14 +36,7 @@ function App() {
 
   const [isDetecting, setIsDetecting] = useState(true);
 
-  // // Modify handleCancel to re-enable detection
-  // handleCancel = () => {
-  //   setCapturedImage(null);
-  //   setWaitingForDecision(false);
-  //   setIsDetecting(true);
-  // };
 
-  // Modify detect function
   const detect = async (net) => {
     if (!isDetecting) {
       return;
@@ -68,7 +63,7 @@ function App() {
       // Make Detections
       const obj = await net.detect(video);
       const cellPhoneDetections = obj.filter(detection => detection.class === 'cell phone');
-
+      // ตีกรอบ detect เจอ
       if (cellPhoneDetections.length > 0) {
         setIsDetecting(false);
         startCountdown();
@@ -87,13 +82,13 @@ function App() {
   };
   // asasdasdasdsadsasadsad
   const startCountdown = () => {
-    if (!isCountingDown && capturing === false) {
+    if (!isCountingDown && !isCapturing) {
       setIsCountingDown(true);
       countdownRef.current = setTimeout(() => {
-        capturing = true;
+        setIsCapturing(true);
         captureImage();
         setIsCountingDown(false);
-      }, 2000);
+      }, 1000);
     }
   };
 
