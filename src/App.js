@@ -28,6 +28,13 @@ function App() {
 
   // Modify handleAccept to reset the waiting state
   const handleAccept = () => {
+    // Stop camera stream
+    if (webcamRef.current && webcamRef.current.video) {
+      const stream = webcamRef.current.video.srcObject;
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
+    }
     const link = document.createElement('a');
     link.href = capturedImage;
     link.download = `phone-slip-${new Date().getTime()}.png`;
@@ -115,7 +122,7 @@ function App() {
     <div className="App" style={{ display: 'flex', justifyContent: 'center', gap: '20px' }}>
       <div className="camera-section">
         <header className="App-header">
-        {showWebcam && (
+          {showWebcam && (
             <Webcam
               ref={webcamRef}
               muted={true}
