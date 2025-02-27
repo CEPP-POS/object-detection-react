@@ -106,7 +106,7 @@ function App() {
       const net = await cocossd.load();
       setInterval(() => {
         detect(net);
-      }, 333);
+      }, 10);
     };
     runCoco();
   }, []);
@@ -115,11 +115,14 @@ function App() {
     <div className="App" style={{ display: 'flex', justifyContent: 'center', gap: '20px' }}>
       <div className="camera-section">
         <header className="App-header">
-          {showWebcam && (
+        {showWebcam && (
             <Webcam
               ref={webcamRef}
               muted={true}
               screenshotFormat="image/png"
+              videoConstraints={{
+                frameRate: 12,
+              }}
               style={{
                 position: "absolute",
                 marginLeft: "auto",
