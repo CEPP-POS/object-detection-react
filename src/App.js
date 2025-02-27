@@ -15,6 +15,7 @@ function App() {
   const [capturedImage, setCapturedImage] = useState(null);
   const [waitingForDecision, setWaitingForDecision] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
+  const [showWebcam, setShowWebcam] = useState(true);
   // Modify handleCancel to reset the waiting state
   const handleCancel = () => {
     setIsCapturing(false);
@@ -22,6 +23,7 @@ function App() {
     setWaitingForDecision(false);
     setIsCountingDown(false);
     setIsDetecting(true);
+    setShowWebcam(true);
   };
 
   // Modify handleAccept to reset the waiting state
@@ -77,8 +79,11 @@ function App() {
   };
 
   const captureImage = () => {
-    const imageSrc = webcamRef.current.getScreenshot();
-    setCapturedImage(imageSrc);
+    if (webcamRef.current) {
+      const imageSrc = webcamRef.current.getScreenshot();
+      setCapturedImage(imageSrc);
+      setShowWebcam(false);
+    }
   };
   // asasdasdasdsadsasadsad
   const startCountdown = () => {
@@ -106,22 +111,24 @@ function App() {
     <div className="App" style={{ display: 'flex', justifyContent: 'center', gap: '20px' }}>
       <div className="camera-section">
         <header className="App-header">
-          <Webcam
-            ref={webcamRef}
-            muted={true}
-            screenshotFormat="image/png"
-            style={{
-              position: "absolute",
-              marginLeft: "auto",
-              marginRight: "auto",
-              left: 0,
-              right: 0,
-              textAlign: "center",
-              zindex: 9,
-              width: 640,
-              height: 480,
-            }}
-          />
+          {showWebcam && (
+            <Webcam
+              ref={webcamRef}
+              muted={true}
+              screenshotFormat="image/png"
+              style={{
+                position: "absolute",
+                marginLeft: "auto",
+                marginRight: "auto",
+                left: 0,
+                right: 0,
+                textAlign: "center",
+                zindex: 9,
+                width: 640,
+                height: 480,
+              }}
+            />
+          )}
           <canvas
             ref={canvasRef}
             style={{
@@ -145,7 +152,6 @@ function App() {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          paddingLeft: "1000px",
         }}>
           <img
             src={capturedImage}
