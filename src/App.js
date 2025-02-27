@@ -14,16 +14,27 @@ function App() {
   const [isCountingDown, setIsCountingDown] = useState(false);
   const [capturedImage, setCapturedImage] = useState(null);
   const [waitingForDecision, setWaitingForDecision] = useState(false);
-  let capturing = false;
+  const [isCapturing, setIsCapturing] = useState(false);
+  const [showWebcam, setShowWebcam] = useState(true);
   // Modify handleCancel to reset the waiting state
   const handleCancel = () => {
-    capturing = false
+    setIsCapturing(false);
     setCapturedImage(null);
     setWaitingForDecision(false);
+    setIsCountingDown(false);
+    setIsDetecting(true);
+    setShowWebcam(true);
   };
 
   // Modify handleAccept to reset the waiting state
   const handleAccept = () => {
+    // Stop camera stream
+    if (webcamRef.current && webcamRef.current.video) {
+      const stream = webcamRef.current.video.srcObject;
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
+    }
     const link = document.createElement('a');
     link.href = capturedImage;
     link.download = `phone-slip-${new Date().getTime()}.png`;
@@ -34,14 +45,7 @@ function App() {
 
   const [isDetecting, setIsDetecting] = useState(true);
 
-  // // Modify handleCancel to re-enable detection
-  // handleCancel = () => {
-  //   setCapturedImage(null);
-  //   setWaitingForDecision(false);
-  //   setIsDetecting(true);
-  // };
 
-  // Modify detect function
   const detect = async (net) => {
     if (!isDetecting) {
       return;
@@ -68,7 +72,7 @@ function App() {
       // Make Detections
       const obj = await net.detect(video);
       const cellPhoneDetections = obj.filter(detection => detection.class === 'cell phone');
-
+      // ตีกรอบ detect เจอ
       if (cellPhoneDetections.length > 0) {
         setIsDetecting(false);
         startCountdown();
@@ -82,18 +86,25 @@ function App() {
   };
 
   const captureImage = () => {
-    const imageSrc = webcamRef.current.getScreenshot();
-    setCapturedImage(imageSrc);
+    // Clear the canvas before capturing
+    const ctx = canvasRef.current.getContext("2d");
+    ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+
+    if (webcamRef.current) {
+      const imageSrc = webcamRef.current.getScreenshot();
+      setCapturedImage(imageSrc);
+      setShowWebcam(false);
+    }
   };
-  // asasdasdasdsadsasadsad
+
   const startCountdown = () => {
-    if (!isCountingDown && capturing === false) {
+    if (!isCountingDown && !isCapturing) {
       setIsCountingDown(true);
       countdownRef.current = setTimeout(() => {
-        capturing = true;
+        setIsCapturing(true);
         captureImage();
         setIsCountingDown(false);
-      }, 2000);
+      }, 1000);
     }
   };
 
@@ -111,22 +122,27 @@ function App() {
     <div className="App" style={{ display: 'flex', justifyContent: 'center', gap: '20px' }}>
       <div className="camera-section">
         <header className="App-header">
-          <Webcam
-            ref={webcamRef}
-            muted={true}
-            screenshotFormat="image/png"
-            style={{
-              position: "absolute",
-              marginLeft: "auto",
-              marginRight: "auto",
-              left: 0,
-              right: 0,
-              textAlign: "center",
-              zindex: 9,
-              width: 640,
-              height: 480,
-            }}
-          />
+          {showWebcam && (
+            <Webcam
+              ref={webcamRef}
+              muted={true}
+              screenshotFormat="image/png"
+              videoConstraints={{
+                frameRate: 12,
+              }}
+              style={{
+                position: "absolute",
+                marginLeft: "auto",
+                marginRight: "auto",
+                left: 0,
+                right: 0,
+                textAlign: "center",
+                zindex: 9,
+                width: 640,
+                height: 480,
+              }}
+            />
+          )}
           <canvas
             ref={canvasRef}
             style={{
@@ -150,7 +166,6 @@ function App() {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          paddingLeft: "1000px",
         }}>
           <img
             src={capturedImage}
